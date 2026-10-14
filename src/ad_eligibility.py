@@ -17,6 +17,4 @@ def is_eligible(campaign: Campaign, request_time: datetime) -> bool:
     if not campaign.enabled:
         return False
 
-    # Seeded demo defect: the documented policy includes ends_at, but this
-    # comparison excludes a request exactly at that boundary.
     return campaign.starts_at <= request_time < campaign.ends_at
