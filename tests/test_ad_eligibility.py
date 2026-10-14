@@ -38,6 +38,3 @@ def test_disabled_campaign_is_ineligible() -> None:
     request_time = datetime.fromisoformat("2026-10-01T09:30:00")
 
     assert is_eligible(campaign, request_time) is False
-
-
-# The exact-end-time regression test is intentionally added during the demo.
