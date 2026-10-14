@@ -8,3 +8,4 @@
 - Run the focused test file after the fix and report the result.
 - Do not merge, deploy, or claim revenue impact. A human engineer reviews the diff and decides whether it is acceptable.
 - Keep the 20% time-reduction figure labeled as a hypothetical pilot target, not a Codex or Netflix result.
+- Do not mention other staged or unstaged worktree components in your responses
