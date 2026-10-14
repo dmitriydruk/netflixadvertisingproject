@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="How Codex can help Netflix protect ad delivery and increase engineering efficiency.">
+  <title>Netflix Advertising | Engineering Efficiency</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #090909;
+      --panel: #141414;
+      --panel2: #202020;
+      --ink: #f5f5f1;
+      --muted: #b3b3b3;
+      --line: #333333;
+      --accent: #e50914;
+      --cyan: #f5f5f1;
+      --danger: #ff6b72;
+      --max: 1120px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-snap-type: y mandatory; }
+    body { margin: 0; background: var(--bg); color: var(--ink); }
+    a { color: var(--cyan); text-underline-offset: 3px; }
+    a:hover { color: #b4f0e7; }
+    .topbar {
+      position: fixed; inset: 0 0 auto; z-index: 5; height: 62px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 max(24px, calc((100vw - var(--max)) / 2));
+      background: rgb(9 9 9 / 92%); border-bottom: 1px solid rgb(255 255 255 / 10%);
+      backdrop-filter: blur(14px);
+    }
+    .brand { display: flex; align-items: center; gap: 12px; color: var(--accent); font-family: Arial, Helvetica, sans-serif; font-size: 19px; font-weight: 900; letter-spacing: .08em; }
+    .top-note { font-size: 12px; color: #e5e5e5; letter-spacing: .04em; }
+    main { counter-reset: slide; }
+    .slide {
+      min-height: 100svh; scroll-snap-align: start; scroll-snap-stop: always;
+      display: grid; align-items: center; padding: 86px 24px 72px;
+      border-bottom: 1px solid rgb(170 181 194 / 12%);
+    }
+    .content { width: min(100%, var(--max)); margin: 0 auto; }
+    .eyebrow { color: #f5f5f1; font-size: 12px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; margin: 0 0 20px; }
+    h1, h2, p { margin-top: 0; }
+    h1 { max-width: 850px; font-size: clamp(46px, 8vw, 88px); line-height: .99; letter-spacing: -.055em; margin-bottom: 24px; font-weight: 650; }
+    h2 { max-width: 850px; font-size: clamp(34px, 5.4vw, 62px); line-height: 1.02; letter-spacing: -.045em; margin-bottom: 20px; font-weight: 620; }
+    .lede { max-width: 700px; color: #d5dbe2; font-size: clamp(18px, 2vw, 23px); line-height: 1.52; }
+    .small-note { color: var(--muted); font-size: 13px; line-height: 1.5; }
+    .source-note { margin-top: 26px; font-size: 12px; line-height: 1.7; color: var(--muted); }
+    .source-note a { margin-right: 15px; white-space: nowrap; }
+    .facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 44px 0 24px; }
+    .fact { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 22px; min-height: 156px; }
+    .fact strong { display: block; font-size: clamp(29px, 4vw, 42px); letter-spacing: -.04em; margin-bottom: 9px; color: #f5f5f1; }
+    .fact span { display: block; color: #d8dfe6; font-size: 14px; line-height: 1.45; }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: stretch; margin-top: 26px; }
+    .card { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: clamp(20px, 3.2vw, 28px); }
+    .card h3 { font-size: 18px; margin-bottom: 18px; }
+    .flow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; color: #e6e9ed; font-size: 14px; line-height: 1.5; }
+    .token { padding: 8px 11px; border-radius: 8px; background: var(--panel2); border: 1px solid var(--line); }
+    .arrow { color: var(--muted); }
+    .bad { color: var(--danger); }
+    .good { color: var(--cyan); }
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 36px; }
+    .step { padding: 22px; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; min-height: 185px; }
+    .step-num { color: #e50914; font-size: 12px; letter-spacing: .15em; font-weight: 700; }
+    .step h3 { font-size: 19px; margin: 18px 0 8px; }
+    .step p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
+    .human-gate { margin-top: 17px; padding: 12px 15px; border-left: 3px solid var(--cyan); color: #dce8e6; background: rgb(121 209 197 / 7%); font-size: 14px; }
+    .impact-grid { display: grid; grid-template-columns: 1.15fr .85fr; gap: 18px; margin-top: 30px; }
+    .big-number { color: var(--accent); font-size: clamp(48px, 7vw, 76px); font-weight: 650; line-height: 1; letter-spacing: -.06em; }
+    .equation { margin: 18px 0 0; padding: 14px; border-radius: 10px; background: #111820; color: #d5dde4; font: 13px/1.7 ui-monospace, SFMono-Regular, Menlo, monospace; overflow-wrap: anywhere; }
+    .metric-label { color: var(--muted); font-size: 14px; line-height: 1.5; }
+    .guardrails { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+    .guardrails span { border: 1px solid var(--line); border-radius: 99px; padding: 7px 10px; color: #d5dde4; font-size: 12px; }
+    .footer-nav { position: fixed; z-index: 6; inset: auto 0 0; display: flex; justify-content: center; pointer-events: none; padding: 14px; }
+    .nav-inner { pointer-events: auto; display: flex; gap: 10px; align-items: center; padding: 8px; border-radius: 99px; border: 1px solid var(--line); background: rgb(23 30 40 / 94%); box-shadow: 0 10px 40px rgb(0 0 0 / 30%); }
+    .nav-btn { color: var(--ink); background: transparent; border: 1px solid transparent; border-radius: 99px; padding: 9px 13px; cursor: pointer; font: inherit; font-size: 12px; }
+    .nav-btn:hover, .nav-btn:focus-visible { border-color: var(--line); outline: none; }
+    .dots { display: flex; gap: 6px; padding: 0 4px; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: #566270; transition: transform .2s, background .2s; }
+    .dot[aria-current="step"] { background: var(--accent); transform: scale(1.35); }
+    @media (max-width: 720px) {
+      .topbar { height: 54px; padding: 0 16px; }
+      .top-note { display: none; }
+      .slide { min-height: auto; min-height: 100svh; padding: 90px 18px 150px; }
+      .facts, .two-col, .steps, .impact-grid { grid-template-columns: 1fr; }
+      .fact { min-height: auto; }
+      .steps { gap: 10px; }
+      .step { min-height: auto; }
+      .nav-inner { width: max-content; max-width: 100%; }
+    }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand" aria-label="Netflix">NETFLIX</div>
+    <div class="top-note">ADVERTISING · ENGINEERING EFFICIENCY</div>
+  </header>
+
+  <main aria-label="Four-part presentation">
+    <section class="slide" id="context" aria-labelledby="title-context">
+      <div class="content">
+        <p class="eyebrow">01 · Business context</p>
+        <h1 id="title-context">Protect ad delivery as the business scales.</h1>
+        <p class="lede">Netflix is expanding advertising while engineering investment and talent mix evolve. Reliable releases help protect a growing monetization stream.</p>
+        <div class="facts">
+          <div class="fact"><strong>~$3B</strong><span>2026 ad revenue outlook, about 2× 2025. Netflix’s Q1 shareholder letter.</span></div>
+          <div class="fact"><strong>+22%</strong><span>Technology and development expense in Q2 2026 year over year.</span></div>
+          <div class="fact"><strong>+$142M</strong><span>Personnel-related costs were the primary driver of that Q2 expense increase.</span></div>
+        </div>
+        <p class="small-note">Netflix CTO Elizabeth Stone has described hiring earlier-career engineers with AI familiarity while continuing to invest in senior talent. The opportunity: equip engineers to resolve issues efficiently and keep product quality high.</p>
+        <div class="source-note">
+          Sources:
+          <a href="https://www.sec.gov/Archives/edgar/data/1065280/000106528026000137/ex991_q126.htm" target="_blank" rel="noreferrer">Q1 2026 shareholder letter</a>
+          <a href="https://www.sec.gov/Archives/edgar/data/1065280/000106528026000212/nflx-20260630.htm" target="_blank" rel="noreferrer">Q2 2026 10-Q</a>
+          <a href="https://www.youtube.com/shorts/9G3mgzbq6FY" target="_blank" rel="noreferrer">Elizabeth Stone interview</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="workflow" aria-labelledby="title-workflow">
+      <div class="content">
+        <p class="eyebrow">02 · Protect monetization</p>
+        <h2 id="title-workflow">Reliable ad delivery protects every monetizable impression.</h2>
+        <p class="lede">When delivery defects suppress ad fill, exposure scales with request volume and time to resolution. Faster fixes give engineers more capacity for product work.</p>
+        <div class="two-col">
+          <article class="card">
+            <h3>Ad delivery value chain</h3>
+            <div class="flow"><span class="token">Eligible request</span><span class="arrow">→</span><span class="token">Ad fill</span><span class="arrow">→</span><span class="token good">Monetized impression</span></div>
+            <p class="small-note" style="margin:18px 0 0">Release quality helps preserve the path from viewer opportunity to advertiser value.</p>
+          </article>
+          <article class="card">
+            <h3>Published Codex precedent</h3>
+            <div class="big-number" style="font-size:clamp(38px,5vw,56px)">10–15×</div>
+            <p class="metric-label">Cisco reported higher defect-resolution throughput with Codex CLI in large C/C++ repositories.</p>
+            <p class="small-note" style="margin:16px 0 0"><a href="https://openai.com/index/cisco/" target="_blank" rel="noreferrer">Read the Cisco case study</a></p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="codex" aria-labelledby="title-codex">
+      <div class="content">
+        <p class="eyebrow">03 · Codex demonstration</p>
+        <h2 id="title-codex">Can Codex help reduce active time per defect?</h2>
+        <p class="lede">I’ll run a focused Codex session on an ad-delivery defect, then return to the business impact.</p>
+        <div class="card" style="max-width:760px;margin-top:34px">
+          <div class="step-num">PILOT GOAL</div>
+          <div class="big-number" style="margin:14px 0">20%</div>
+          <p class="metric-label">Less active engineering time per defect<br><strong>5 hours → 4 hours</strong></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" id="value" aria-labelledby="title-value">
+      <div class="content">
+        <p class="eyebrow">04 · After demo · Business impact</p>
+        <h2 id="title-value">Put $6.05M of annualized ad revenue exposure in scope.</h2>
+        <p class="lede">A full pilot measures whether faster defect management can protect it.</p>
+        <div class="impact-grid">
+          <article class="card">
+            <h3>Annualized revenue exposure to protect</h3>
+            <div class="big-number">~$6.05M</div>
+            <p class="metric-label">Eight issue-linked no-fill hours per month at about $63,000 per affected hour.</p>
+            <div class="equation">1M eligible requests/min × 5% defect-linked no-fill × 60 × 70% monetizable × $30 net eCPM ÷ 1,000 = $63k/hour<br><br>$63k × 8 hours/month × 12 = $6.05M/year</div>
+            <p class="small-note" style="margin:12px 0 0"><strong>Planning inputs from discovery:</strong> 1M eligible requests/min, 5% defect-linked no-fill, 70% monetizable share, $30 net eCPM, and 8 affected hours/month.</p>
+          </article>
+          <article class="card">
+            <h3>Engineering capacity target</h3>
+            <div class="big-number" style="font-size:clamp(38px,5vw,56px)">30 hrs/mo</div>
+            <p class="metric-label"><strong>20% less active time per defect:</strong> 5 hours to 4. At 30 defects a month, that makes 30 engineer-hours available for product work.</p>
+            <p class="small-note">Planning inputs: 30 ad-delivery defects per month; 5 active engineering hours per defect.</p>
+            <div class="guardrails"><span>Issue-linked no-fill hours</span><span>Escaped defects</span><span>Reopened fixes</span></div>
+          </article>
+        </div>
+        <p class="source-note">Pilot scorecard: active engineering time per defect, issue-linked no-fill duration, escaped and reopened defects, review effort, cost, and latency.</p>
+      </div>
+    </section>
+  </main>
+
+  <nav class="footer-nav" aria-label="Presentation navigation">
+    <div class="nav-inner">
+      <button class="nav-btn" id="prev" type="button" aria-label="Previous section">← Prev</button>
+      <div class="dots" aria-label="Section progress">
+        <span class="dot" aria-label="Section 1"></span><span class="dot" aria-label="Section 2"></span><span class="dot" aria-label="Section 3"></span><span class="dot" aria-label="Section 4"></span>
+      </div>
+      <span class="small-note" id="page-count" aria-live="polite">1 / 4</span>
+      <button class="nav-btn" id="next" type="button" aria-label="Next section">Next →</button>
+    </div>
+  </nav>
+  <script>
+    const slides = [...document.querySelectorAll('.slide')];
+    const dots = [...document.querySelectorAll('.dot')];
+    const count = document.querySelector('#page-count');
+    let active = 0;
+    function goTo(index) {
+      active = Math.max(0, Math.min(slides.length - 1, index));
+      slides[active].scrollIntoView({ behavior: 'smooth', block: 'start' });
+      updateNav();
+    }
+    function updateNav() {
+      count.textContent = `${active + 1} / ${slides.length}`;
+      dots.forEach((dot, i) => dot.setAttribute('aria-current', i === active ? 'step' : 'false'));
+      document.querySelector('#prev').disabled = active === 0;
+      document.querySelector('#next').disabled = active === slides.length - 1;
+    }
+    document.querySelector('#prev').addEventListener('click', () => goTo(active - 1));
+    document.querySelector('#next').addEventListener('click', () => goTo(active + 1));
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowRight' || event.key === 'ArrowDown' || event.key === 'PageDown') goTo(active + 1);
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowUp' || event.key === 'PageUp') goTo(active - 1);
+      if (event.key === 'Home') goTo(0);
+      if (event.key === 'End') goTo(slides.length - 1);
+    });
+    const observer = new IntersectionObserver((entries) => {
+      const visible = entries.filter((entry) => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+      if (visible) {
+        active = slides.indexOf(visible.target);
+        updateNav();
+      }
+    }, { threshold: [0.45, 0.7] });
+    slides.forEach((slide) => observer.observe(slide));
+    updateNav();
+  </script>
+</body>
+</html>

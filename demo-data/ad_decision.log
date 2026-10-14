@@ -1,0 +1,4 @@
+2026-10-01T10:00:00Z INFO request_id=req-demo-1042 campaign_id=campaign-demo-7 decision=no_fill reason=outside_campaign_window
+2026-10-01T10:00:01Z INFO request_id=req-demo-1043 campaign_id=campaign-demo-7 decision=no_fill reason=outside_campaign_window
+
+# Synthetic demonstration log. IDs and timestamps are fabricated.
